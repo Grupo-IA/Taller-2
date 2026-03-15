@@ -66,7 +66,68 @@ class MinimaxAgent(MultiAgentSearchAgent):
         - Return the ACTION (not the value) that maximizes the minimax value for the drone.
         """
         # TODO: Implement your code here
-        return None
+        num_agents = state.get_num_agents()
+
+        def minimax(game_state, agent_index, depth):
+
+            # estado terminal
+            if game_state.is_win() or game_state.is_lose() or depth == self.depth:
+                return self.evaluation_function(game_state)
+
+            actions = game_state.get_legal_actions(agent_index)
+
+            if not actions:
+                return self.evaluation_function(game_state)
+
+            next_agent = (agent_index + 1) % num_agents
+            next_depth = depth + 1 if next_agent == 0 else depth
+
+            # DRONE (MAX)
+            if agent_index == 0:
+
+                value = float("-inf")
+
+                for action in actions:
+                    successor = game_state.generate_successor(agent_index, action)
+
+                    value = max(
+                        value,
+                        minimax(successor, next_agent, next_depth)
+                    )
+
+                return value
+
+            #HUNTERS (MIN)
+            else:
+
+                value = float("inf")
+
+                for action in actions:
+                    successor = game_state.generate_successor(agent_index, action)
+
+                    value = min(
+                        value,
+                        minimax(successor, next_agent, next_depth)
+                    )
+
+                return value
+
+        # elegir mejor acción para el dron 
+
+        best_action = None
+        best_value = float("-inf")
+
+        for action in state.get_legal_actions(0):
+
+            successor = state.generate_successor(0, action)
+
+            value = minimax(successor, 1, 0)
+
+            if value > best_value:
+                best_value = value
+                best_action = action
+
+        return best_action
 
 
 class AlphaBetaAgent(MultiAgentSearchAgent):
