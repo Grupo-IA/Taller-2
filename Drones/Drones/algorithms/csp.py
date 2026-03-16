@@ -207,29 +207,37 @@ def backtracking_mrv_lcv(csp: DroneAssignmentCSP) -> dict[str, str] | None:
     def recursiva_mrv_lcv(assignment):
         if csp.is_complete(assignment):
             return assignment
-          
-        var= mrv(csp, assignment)
-        for value in lcv(csp, var, assignment):
+        
+        sin_asignar = csp.get_unassigned_variables(assignment)
+        var = min(sin_asignar, key=lambda v: len(csp.domains[v]))
+        
+        valores_ordenados = sorted(
+            csp.domains[var],
+            key=lambda v: csp.get_num_conflicts(var, v, assignment)
+        )
+        
+        for value in valores_ordenados:
             if csp.is_consistent(var, value, assignment):
                 csp.assign(var, value, assignment)
+                
                 copia_dominios = {v: lista.copy() for v, lista in csp.domains.items()}
+        
+        ok = True
+        for vecino in csp.get_neighbors(var):
+            if vecino not in assignment:
+                csp.domains[vecino] = [
+                    v for v in csp.domains[vecino]
+                    if csp.is_consistent(vecino, v, assignment)
+                ]
+                if not csp.domains[vecino]:
+                    ok = False
+                    break
 
-                dominios_ok = True
-            for neighbor in csp.get_neighbors(var):
-                if neighbor not in assignment:
-                    csp.domains[neighbor] = [
-                        v for v in csp.domains[neighbor]
-                        if csp.is_consistent(neighbor, v, assignment)
-                    ]
-                    if not csp.domains[neighbor]:
-                        dominios_ok = False
-                        break
+        if ok:
+            resultado = recursiva(assignment)
+            if resultado is not None:
+                return resultado
 
-            if dominios_ok:
-                result = recursiva_mrv_lcv(assignment)
-                if result:
-                    return result
-
-            csp.domains = copia_dominios
-            csp.unassign(var, assignment)
+                csp.domains = copia_dominios
+                csp.unassign(var, assignment)
     return None
