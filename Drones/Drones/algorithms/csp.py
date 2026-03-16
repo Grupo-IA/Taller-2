@@ -8,7 +8,7 @@ if TYPE_CHECKING:
     from algorithms.problems_csp import DroneAssignmentCSP
 
 
-def backtracking_search(csp: DroneAssignmentCSP) -> dict[str, str] | None:
+def backtracking_search(csp: DroneAssignmentCSP, assignment: dict[str, str] | None = None) -> dict[str, str] | None:
     """
     Basic backtracking search without optimizations.
 
@@ -26,7 +26,20 @@ def backtracking_search(csp: DroneAssignmentCSP) -> dict[str, str] | None:
     You can find inspiration in the textbook's pseudocode:
     Artificial Intelligence: A Modern Approach (4th Edition) by Russell and Norvig, Chapter 5: Constraint Satisfaction Problems
     """
-    # TODO: Implement your code here
+    if csp.is_complete(assignment):
+        return assignment
+      
+      
+    var = csp.get_unassigned_variables(assignment)[0]  # Select the first unassigned variable
+    
+    for value in csp.domains[var]:  # Iterate over possible values
+        if csp.is_consistent(var, value, assignment):  # Check consistency
+            csp.assign(var, value, assignment)  # Assign the value
+            result = backtracking_search(csp, assignment)  # Recur with the new assignment
+            if result is not None:  # If a solution is found, return it
+                return result
+            csp.unassign(var, assignment)  # Backtrack if no solution found
+            
     return None
 
 
