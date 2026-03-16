@@ -7,7 +7,7 @@ if TYPE_CHECKING:
     from algorithms.problems_csp import DroneAssignmentCSP
 
 
-def backtracking_search(csp: DroneAssignmentCSP) -> dict[str, str] | None:
+def backtracking_search(csp: DroneAssignmentCSP, assignment: dict[str, str] | None = None) -> dict[str, str] | None:
     """
     Basic backtracking search without optimizations.
 
