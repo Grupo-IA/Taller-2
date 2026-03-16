@@ -1,5 +1,6 @@
-import math
 from __future__ import annotations
+
+import math
 
 from typing import TYPE_CHECKING
 
@@ -51,15 +52,18 @@ def remove_inconsistent_values(csp: DroneAssignmentCSP, Ai, Aj):
         j= 0
         while j < len(csp.domains[Aj]) and not posible:
             dron2= csp.domains[Aj][j]
-            if DroneAssignmentCSP.is_consistent(Ai, dron, {Aj: dron2}):
+            if csp.is_consistent(Ai, dron, {Aj: dron2}):
                 posible= True
         if posible == False:
             csp.domains[Ai].remove(dron)
             removido= True
     return removido
   
-def AC_3(csp: DroneAssignmentCSP | None) -> bool:
-    cola= []
+def AC_3(csp: DroneAssignmentCSP | None, arcos= None) -> bool:
+    if arcos is not None:
+        cola = list(arcos)
+    else:
+        cola = []
     for Ai in csp.variables:
       for Aj in csp.get_neighbors(Ai):
         cola.append((Ai, Aj))
@@ -75,20 +79,20 @@ def AC_3(csp: DroneAssignmentCSP | None) -> bool:
     return True
         
 def mrv(csp: DroneAssignmentCSP, assignment):
-    sin_asignar= DroneAssignmentCSP.get_unassigned_variables(assignment)
+    sin_asignar= csp.get_unassigned_variables(assignment)
     minimo= math.inf
     for var in sin_asignar:
-        if len(DroneAssignmentCSP.domains[var]) < minimo:
-            minimo= len(DroneAssignmentCSP.domains[var])
+        if len(csp.domains[var]) < minimo:
+            minimo= len(csp.domains[var])
             variable= var
     return variable
   
 def lcv(csp: DroneAssignmentCSP, var, assignment):
-    valores= DroneAssignmentCSP.domains[var]
+    valores= csp.domains[var]
     ordenados= []
     retorno= []
     for valor in valores:
-        conflictos= DroneAssignmentCSP.get_num_conflicts(var, valor, assignment)
+        conflictos= csp.get_num_conflicts(var, valor, assignment)
         ordenados.append((conflictos, valor))
     ordenados.sort()
     for e in ordenados:
@@ -112,7 +116,32 @@ def backtracking_ac3(csp: DroneAssignmentCSP) -> dict[str, str] | None:
       - a backtrack function that integrates AC-3 into the search process.
     """
     # TODO: Implement your code here
-    return None
+    assignment= {}
+    if not AC_3(csp):
+        return None
+
+    def recursiva_backtrack_ac3(assignment):
+      if csp.is_complete(assignment):
+       return assignment
+      var= csp.get_unassigned_variables(assignment)[0]
+      for value in csp.domains[var]:
+        if csp.is_consistent(var, value, assignment):
+          csp.assign(var, value, assignment)
+          copia_dominios= {}
+          for variable, lista in csp.domains.items():
+            copia_dominios[variable]= lista.copy()
+          arcos = []
+          for neighbor in csp.get_neighbors(var):
+              arcos.append((neighbor, var))
+          if AC_3(csp, arcos):
+              result = recursiva_backtrack_ac3(assignment)
+              if result is not None:
+                  return result
+          csp.domains = copia_dominios
+          csp.unassign(var, assignment)
+
+      return None
+    return recursiva_backtrack_ac3({})
 
 
 def backtracking_mrv_lcv(csp: DroneAssignmentCSP) -> dict[str, str] | None:
