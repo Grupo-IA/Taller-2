@@ -1,6 +1,5 @@
-import math
 from __future__ import annotations
-
+import math
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -42,7 +41,7 @@ def backtracking_search(csp: DroneAssignmentCSP, assignment: dict[str, str] | No
     return None
 
 
-def backtracking_fc(csp: DroneAssignmentCSP) -> dict[str, str] | None:
+def backtracking_fc(csp: "DroneAssignmentCSP", assignment: dict[str, str], domains: dict[str, list[str]]) -> dict[str, str] | None:
     """
     Backtracking search with Forward Checking.
 
@@ -54,7 +53,35 @@ def backtracking_fc(csp: DroneAssignmentCSP) -> dict[str, str] | None:
     - Use csp.is_consistent(neighbor, val, assignment) to check if a value is still consistent.
     - Forward checking reduces the search space by detecting failures earlier than basic backtracking.
     """
-    # TODO: Implement your code here
+    if csp.is_complete(assignment):
+        return assignment
+      
+    var = csp.get_unassigned_variables(assignment)[0]  # Select the first unassigned variable
+    
+    for value in domains[var]:  # Iterate over possible values
+        if csp.is_consistent(var, value, assignment):  # Check consistency
+            csp.assign(var, value, assignment)  # Assign the value
+            
+            # Forward checking: Save current domains to restore later
+            saved_domains = {neighbor: list(domains[neighbor]) for neighbor in csp.get_neighbors(var)}
+            
+            # Eliminate inconsistent values from neighbors' domains
+            for neighbor in csp.get_neighbors(var):
+                if neighbor not in assignment:
+                    domains[neighbor] = [val for val in domains[neighbor] if csp.is_consistent(neighbor, val, assignment)]
+                    if not domains[neighbor]:  # If any neighbor's domain is empty, backtrack
+                        break
+            
+            else:  # Only recurse if no neighbor's domain is empty
+                result = backtracking_fc(csp, assignment, domains)  # Recur with the new assignment
+                if result is not None:  # If a solution is found, return it
+                    return result
+            
+            # Restore domains on backtrack
+            for neighbor in saved_domains:
+                domains[neighbor] = saved_domains[neighbor]
+                
+            csp.unassign(var, assignment)  # Backtrack if no solution found
     return None
 
 def remove_inconsistent_values(csp: DroneAssignmentCSP, Ai, Aj):
