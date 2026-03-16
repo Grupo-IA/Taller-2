@@ -53,6 +53,11 @@ def backtracking_fc(csp: "DroneAssignmentCSP", assignment: dict[str, str], domai
     - Use csp.is_consistent(neighbor, val, assignment) to check if a value is still consistent.
     - Forward checking reduces the search space by detecting failures earlier than basic backtracking.
     """
+    if assignment is None:
+        assignment = {}
+    if domains is None:
+        domains = {var: list(csp.domains[var]) for var in csp.variables}
+    
     if csp.is_complete(assignment):
         return assignment
       
