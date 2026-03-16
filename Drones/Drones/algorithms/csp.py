@@ -43,8 +43,8 @@ def backtracking_fc(csp: DroneAssignmentCSP) -> dict[str, str] | None:
     # TODO: Implement your code here
     return None
 
-def consistencia(csp: DroneAssignmentCSP, Ai, Aj):
-    cambios= False
+def remove_inconsistent_values(csp: DroneAssignmentCSP, Ai, Aj):
+    removido= False
     for dron in csp.domains[Ai]:
         posible= False
         j= 0
@@ -54,8 +54,8 @@ def consistencia(csp: DroneAssignmentCSP, Ai, Aj):
                 posible= True
         if posible == False:
             csp.domains[Ai].remove(dron)
-            cambios= True
-    return cambios
+            removido= True
+    return removido
   
 def AC_3(csp: DroneAssignmentCSP | None) -> bool:
     cola= []
@@ -65,7 +65,7 @@ def AC_3(csp: DroneAssignmentCSP | None) -> bool:
         
     while cola != []:
       (Ai,Aj)= cola.pop(0)
-      if consistencia(csp, Ai, Aj):
+      if remove_inconsistent_values(csp, Ai, Aj):
         if len(csp.domains[Ai]) == 0:
           return False
         for Ak in csp.get_neighbors(Ai):
