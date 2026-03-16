@@ -143,14 +143,14 @@ def backtracking_ac3(csp: DroneAssignmentCSP) -> dict[str, str] | None:
           copia_dominios= {}
           for variable, lista in csp.domains.items():
             copia_dominios[variable]= lista.copy()
-          arcos = []
+          arcos= []
           for neighbor in csp.get_neighbors(var):
               arcos.append((neighbor, var))
           if AC_3(csp, arcos):
-              result = recursiva_backtrack_ac3(assignment)
+              result= recursiva_backtrack_ac3(assignment)
               if result is not None:
                   return result
-          csp.domains = copia_dominios
+          csp.domains= copia_dominios
           csp.unassign(var, assignment)
 
       return None
@@ -169,5 +169,23 @@ def backtracking_mrv_lcv(csp: DroneAssignmentCSP) -> dict[str, str] | None:
       values that rule out the fewest choices for neighboring variables.
     - Use csp.get_num_conflicts(var, value, assignment) to count how many values would be ruled out for neighbors if var=value is assigned.
     """
-    # TODO: Implement your code here (BONUS)
-    return None
+    def recursiva_mrv_lcv(assignment):
+        if csp.is_complete(assignment):
+            return assignment
+          
+        var= mrv(csp, assignment)
+        for value in lcv(csp, var, assignment):
+            if csp.is_consistent(var, value, assignment):
+                csp.assign(var, value, assignment)
+                copia_dominios= {}
+                for variable, lista in csp.domains.items():
+                  copia_dominios[variable]= lista.copy()
+                if backtracking_fc(csp):
+                    result= recursiva_mrv_lcv(assignment)
+                    if result: return result
+                
+                csp.domains= copia_dominios
+                csp.unassign(var, assignment)
+        return None
+
+    return recursiva_mrv_lcv({})
