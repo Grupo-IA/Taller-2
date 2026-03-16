@@ -24,6 +24,9 @@ def backtracking_search(csp: DroneAssignmentCSP, assignment: dict[str, str] | No
     You can find inspiration in the textbook's pseudocode:
     Artificial Intelligence: A Modern Approach (4th Edition) by Russell and Norvig, Chapter 5: Constraint Satisfaction Problems
     """
+    if assignment is None:
+        assignment = {}
+    
     if csp.is_complete(assignment):
         return assignment
       
@@ -41,7 +44,7 @@ def backtracking_search(csp: DroneAssignmentCSP, assignment: dict[str, str] | No
     return None
 
 
-def backtracking_fc(csp: "DroneAssignmentCSP", assignment: dict[str, str], domains: dict[str, list[str]]) -> dict[str, str] | None:
+def backtracking_fc(csp: "DroneAssignmentCSP", assignment=None, domains=None) -> dict[str, str] | None:
     """
     Backtracking search with Forward Checking.
 
