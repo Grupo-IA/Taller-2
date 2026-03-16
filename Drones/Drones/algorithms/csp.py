@@ -1,3 +1,4 @@
+import math
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
@@ -73,7 +74,26 @@ def AC_3(csp: DroneAssignmentCSP | None) -> bool:
             cola.append((Ak, Ai))
     return True
         
-
+def mrv(csp: DroneAssignmentCSP, assignment):
+    sin_asignar= DroneAssignmentCSP.get_unassigned_variables(assignment)
+    minimo= math.inf
+    for var in sin_asignar:
+        if len(DroneAssignmentCSP.domains[var]) < minimo:
+            minimo= len(DroneAssignmentCSP.domains[var])
+            variable= var
+    return variable
+  
+def lcv(csp: DroneAssignmentCSP, var, assignment):
+    valores= DroneAssignmentCSP.domains[var]
+    ordenados= []
+    retorno= []
+    for valor in valores:
+        conflictos= DroneAssignmentCSP.get_num_conflicts(var, valor, assignment)
+        ordenados.append((conflictos, valor))
+    ordenados.sort()
+    for e in ordenados:
+        retorno.append(e[1])
+    return retorno
 
 def backtracking_ac3(csp: DroneAssignmentCSP) -> dict[str, str] | None:
     """
