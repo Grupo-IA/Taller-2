@@ -234,10 +234,10 @@ def backtracking_mrv_lcv(csp: DroneAssignmentCSP) -> dict[str, str] | None:
                     break
 
         if ok:
-            resultado = recursiva(assignment)
+            resultado = recursiva_mrv_lcv(assignment)
             if resultado is not None:
                 return resultado
 
-                csp.domains = copia_dominios
-                csp.unassign(var, assignment)
+        csp.domains = copia_dominios
+        csp.unassign(var, assignment)
     return None
